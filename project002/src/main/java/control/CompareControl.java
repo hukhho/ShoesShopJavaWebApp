@@ -1,0 +1,151 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/Servlet.java to edit this template
+ */
+package control;
+
+import dao.Dao;
+import entiry.Brand;
+import entiry.Color;
+import entiry.OrderProduct;
+import entiry.Product;
+import entiry.ProductFullInfo;
+import entiry.User;
+import entiry.UserCart;
+import entiry.UserSession;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.List;
+import javax.persistence.metamodel.SetAttribute;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+/**
+ *
+ * @author pc
+ */
+public class CompareControl extends HttpServlet {
+
+    /**
+     * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
+     * methods.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html;charset=UTF-8");
+
+        HttpSession ss = request.getSession();
+        UserSession us = (UserSession) ss.getAttribute("usersession");
+        User info = (User) ss.getAttribute("userinfo");
+
+        Dao dao = new Dao();
+
+        String pid1 = request.getParameter("pid1");
+
+        List<ProductFullInfo> listfullbypid1 = dao.getProductFullInfoByPid(pid1);
+        Product pro1 = dao.getProduct(pid1);
+
+        request.setAttribute("pro1", pro1);
+        request.setAttribute("listfullbypid1", listfullbypid1);
+        int total1 = 0;
+
+        for (ProductFullInfo x : listfullbypid1) {
+            total1 += x.getAmount();
+        }
+
+        request.setAttribute("total1", total1);
+
+        String pid2 = request.getParameter("pid2");
+
+        List<ProductFullInfo> listfullbypid2 = dao.getProductFullInfoByPid(pid2);
+        Product pro2 = dao.getProduct(pid2);
+
+        request.setAttribute("pro2", pro2);
+        request.setAttribute("listfullbypid2", listfullbypid2);
+        int total2 = 0;
+
+        for (ProductFullInfo x : listfullbypid2) {
+            total2 += x.getAmount();
+        }
+
+        request.setAttribute("total2", total2);
+
+        if (us != null) {
+            Dao cartdao = new Dao();
+
+            List<UserCart> cartlist = cartdao.getUserCart(us.getUsername());
+            request.setAttribute("cartlist", cartlist);
+
+            HashMap<UserCart, ProductFullInfo> productmap = new HashMap<UserCart, ProductFullInfo>();
+
+            List<ProductFullInfo> productlist = cartdao.getAllProductFullInfo();
+
+            for (int i = 0; i < cartlist.size(); i++) {
+                for (int j = 0; j < productlist.size(); j++) {
+                    if (cartlist.get(i).getPiid() == productlist.get(j).getPiid()) {
+                        productmap.put(cartlist.get(i), productlist.get(j));
+                    }
+                }
+            }
+            request.setAttribute("productmap", productmap);
+
+            User info1 = dao.getUserInfo(info.getId());
+
+            request.setAttribute("info1", info1);
+
+            request.getRequestDispatcher("compare.jsp").forward(request, response);
+        } else {
+            request.getRequestDispatcher("compare.jsp").forward(request, response);
+        }
+    }
+
+    // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
+    /**
+     * Handles the HTTP <code>GET</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Handles the HTTP <code>POST</code> method.
+     *
+     * @param request servlet request
+     * @param response servlet response
+     * @throws ServletException if a servlet-specific error occurs
+     * @throws IOException if an I/O error occurs
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        processRequest(request, response);
+    }
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
+}

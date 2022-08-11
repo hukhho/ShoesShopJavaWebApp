@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/project002">
+  <Resource auth="Container" driverClassName="com.microsoft.sqlserver.jdbc.SQLServerDriver" maxActive="20" maxIdle="10" maxWait="-1" name="prj301" password="123" type="javax.sql.DataSource" url="jdbc:sqlserver://localhost:1433;databaseName=prj301" username="sa"/>
+  <ResourceLink global="prj301" name="e" type="javax.sql.DataSource"/>
+</Context>
